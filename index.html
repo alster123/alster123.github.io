@@ -30,12 +30,108 @@
         }
         .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            padding: 20px 0;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        .gallery img {
+        .gallery-item {
+            aspect-ratio: 16/9;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .gallery-item:hover {
+            transform: scale(1.02);
+        }
+        .gallery-item img {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .image-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .gallery-item:hover .image-caption {
+            opacity: 1;
+        }
+        .slideshow-container {
+            display: none;
+            max-width: 1000px;
+            position: relative;
+            margin: auto;
+        }
+        .slide {
+            display: none;
+            aspect-ratio: 16/9;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .slide.active {
+            display: block;
+        }
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 16px;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            user-select: none;
+            transition: 0.3s ease;
+        }
+        .next {
+            right: 0;
+        }
+        .prev {
+            left: 0;
+        }
+        .view-toggle {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .view-toggle button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            background: #333;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .view-toggle button:hover {
+            background: #555;
+        }
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .gallery-item {
+                aspect-ratio: 4/3;
+            }
         }
     </style>
 </head>
@@ -56,13 +152,48 @@
             <h2>Welcome to My Photography Portfolio</h2>
             <p>Here you'll find a collection of my best drone photographs. Enjoy!</p>
         </section>
+        <div class="view-toggle">
+            <button onclick="toggleView('grid')">Grid View</button>
+            <button onclick="toggleView('slideshow')">Slideshow</button>
+        </div>
         <section id="gallery" class="gallery">
-            <!-- Replace these with your actual images -->
-            <img src="/Pentacrest.jpg" alt="Photo 1">
-            <img src="/Pentacrest3.jpg" alt="Photo 3">
-            <img src="/Pentacrest4.jpg" alt="Photo 4">
-            <img src="/Hancher.jpg" alt="Photo 5">
+            <div class="gallery-item">
+                <img src="/Pentacrest.jpg" alt="Pentacrest Aerial View" loading="lazy">
+                <div class="image-caption">Pentacrest - University of Iowa's Historic Center</div>
+            </div>
+            <div class="gallery-item">
+                <img src="/Pentacrest3.jpg" alt="Pentacrest Different Angle" loading="lazy">
+                <div class="image-caption">Pentacrest from Another Perspective</div>
+            </div>
+            <div class="gallery-item">
+                <img src="/Pentacrest4.jpg" alt="Pentacrest Detail Shot" loading="lazy">
+                <div class="image-caption">Detailed View of Pentacrest Architecture</div>
+            </div>
+            <div class="gallery-item">
+                <img src="/Hancher.jpg" alt="Hancher Auditorium" loading="lazy">
+                <div class="image-caption">Hancher Auditorium - Iowa's Premier Performance Venue</div>
+            </div>
         </section>
+        <div class="slideshow-container">
+            <div class="slide">
+                <img src="/Pentacrest.jpg" alt="Pentacrest Aerial View" loading="lazy">
+                <div class="image-caption">Pentacrest - University of Iowa's Historic Center</div>
+            </div>
+            <div class="slide">
+                <img src="/Pentacrest3.jpg" alt="Pentacrest Different Angle" loading="lazy">
+                <div class="image-caption">Pentacrest from Another Perspective</div>
+            </div>
+            <div class="slide">
+                <img src="/Pentacrest4.jpg" alt="Pentacrest Detail Shot" loading="lazy">
+                <div class="image-caption">Detailed View of Pentacrest Architecture</div>
+            </div>
+            <div class="slide">
+                <img src="/Hancher.jpg" alt="Hancher Auditorium" loading="lazy">
+                <div class="image-caption">Hancher Auditorium - Iowa's Premier Performance Venue</div>
+            </div>
+            <a class="prev" onclick="changeSlide(-1)">❮</a>
+            <a class="next" onclick="changeSlide(1)">❯</a>
+        </div>
         <section id="about">
             <h2>About Me</h2>
             <p>I'm a Software Engineer who flys my drone and takes photos recreationally</p>
@@ -75,5 +206,44 @@
     <footer>
         <p>&copy; 2024 Alan Rolla. All rights reserved.</p>
     </footer>
+    <script>
+        let currentView = 'grid';
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+
+        function toggleView(view) {
+            const gridView = document.querySelector('.gallery');
+            const slideshowView = document.querySelector('.slideshow-container');
+            
+            if (view === 'grid') {
+                gridView.style.display = 'grid';
+                slideshowView.style.display = 'none';
+                currentView = 'grid';
+            } else {
+                gridView.style.display = 'none';
+                slideshowView.style.display = 'block';
+                currentView = 'slideshow';
+                showSlide(currentSlide);
+            }
+        }
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.style.display = 'none');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].style.display = 'block';
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        toggleView('grid');
+
+        setInterval(() => {
+            if (currentView === 'slideshow') {
+                changeSlide(1);
+            }
+        }, 5000);
+    </script>
 </body>
 </html>
